@@ -1,0 +1,28 @@
+Date,Time,Name,Amount,Category,Notes
+09-12-2025,09:10,Coffee,120,Food,Morning coffee
+10-12-2025,18:40,Bus Fare,40,Transport,
+11-12-2025,20:15,Dinner,360,Food,Ordered online
+12-12-2025,14:20,Groceries,950,Shopping,Weekly groceries
+13-12-2025,10:00,Electricity Bill,1480,Bills,November bill
+14-12-2025,19:30,Movie Ticket,320,Entertainment,Weekend show
+08-12-2025,08:45,Cab Ride,210,Transport,Office commute
+07-12-2025,13:05,Lunch,190,Food,
+30-11-2025,21:10,Online Course,2600,Education,Python refresher
+28-11-2025,17:35,Medicines,430,Health,
+25-11-2025,09:00,Coffee,110,Food,
+22-11-2025,22:20,Snacks,95,Food,Late night snack
+18-11-2025,16:10,Mobile Recharge,299,Bills,
+15-11-2025,07:50,Auto Fare,60,Transport,
+12-11-2025,12:40,Books,780,Education,Reference material
+05-10-2025,18:25,Dinner,410,Food,Family outing
+21-09-2025,11:15,Doctor Visit,850,Health,Consultation
+18-08-2025,09:05,Coffee,130,Food,
+10-07-2025,20:50,Streaming Subscription,499,Entertainment,Monthly renewal
+02-06-2025,15:30,Clothes,2200,Shopping,Seasonal sale
+14-03-2025,06:30,Train Ticket,1500,Travel,
+22-01-2025,19:00,Dinner,390,Food,
+15-12-2024,10:20,Internet Bill,999,Bills,Fiber connection
+10-09-2024,14:10,Workshop Fee,3100,Education,Data science workshop
+05-06-2024,18:00,Gym Membership,1800,Health,Quarterly plan
+05-06-2024,18:00,blinker fluid,700,other,
+13-12-2025,10:00,something useless,200,other,
