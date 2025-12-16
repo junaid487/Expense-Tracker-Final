@@ -1,3 +1,8 @@
+# TODO 
+# Next work on FAB - high priority --- Done
+# Add Export actions 
+# Then on filters if needed
+
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -6,23 +11,20 @@ import plotly.graph_objects as go
 from streamlit_float import *
 import io
 import matplotlib.pyplot as plt
+import time as tm
 
 st.set_page_config(page_title="Expense Tracker", layout="wide")
+float_init()
 
 #------------------------------------
 filename = "expense_tracker.csv"
-column_list = ['S.no', "Date", "Time", "Name", "Amount", "Category", "Notes"]
+column_list = ["Date", "Time", "Name", "Amount", "Category", "Notes"]
 categories = ['Food','Transport','Shopping','Bills','Entertainment','Health','Travel','Education','Other']
 
 try:
     df = pd.read_csv(filename)
 except:
     df = pd.DataFrame(columns=column_list)
-
-
-#--------------------EMPTY PAGE----------------------
-
-#------------------------------------------------------
 
 
 #--------------Helper Functions------------
@@ -58,10 +60,236 @@ def display_formatting(df):
     df_display = df_display.set_index('S.no', drop=True)
     return df_display
 
-#--------------------Main APP----------------
+
+# =================== FLOATING ACTION BUTTON(FAB) ===================
+
+if "show_fab_menu" not in st.session_state:
+    st.session_state.show_fab_menu = False
+if "open_add_flag" not in st.session_state:
+    st.session_state.open_add_flag = False
+if "open_delete_flag" not in st.session_state:
+    st.session_state.open_delete_flag = False
+if "clear_all_flag" not in st.session_state:
+    st.session_state.clear_all_flag = False
+if "show_clear_popup" not in st.session_state:
+    st.session_state.show_clear_popup = False
+if "show_add_popup" not in st.session_state:
+    st.session_state.show_add_popup = False
+
+#---------------------------------------------------
+def toggle_fab_menu():
+    st.session_state.show_fab_menu = not st.session_state.show_fab_menu
+
+#---------------------------------------------------
+fab_container = st.container()
+with fab_container:
+    st.markdown('<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">', unsafe_allow_html=True)
+    if st.session_state.show_fab_menu:
+
+        if st.button("➕ Add Expense", key="fab_add_expense", type="secondary", width='stretch'):
+            st.session_state.open_add_flag = True
+            toggle_fab_menu()
+            st.rerun()
+            
+        if st.button("🗑️ Delete Expense", key="fab_delete_expense", type="secondary", disabled=df.empty, width='stretch'):
+            st.session_state.open_delete_flag = True
+            toggle_fab_menu()
+            st.rerun()
+            
+        if st.button("🔥 Clear All", key="fab_clear_all", type="secondary", disabled=df.empty, width='stretch'):
+            st.session_state.show_clear_popup = True
+            toggle_fab_menu()
+            st.rerun()
+            
+    main_button_label = "❌ Close Menu" if st.session_state.show_fab_menu else "➕ Actions"
+    st.button(main_button_label, on_click=toggle_fab_menu, key="main_fab_toggle", type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+fab_container.float("bottom: 20px; right: 20px; width: 170px; z-index: 1000;")
+
+# ----------------- ADD EXPENSE DIALOG -----------------
+if st.session_state.open_add_flag:
+    st.session_state.show_add_popup = True
+    st.session_state.open_add_flag = False
+
+if st.session_state.show_add_popup:
+    st.session_state.show_add_popup = False
+    @st.dialog("Add Expense")
+    def add_expense_popup():
+        error_text = st.empty()
+
+        input_col1, input_col2 = st.columns(2)
+        input_col3, input_col4 = st.columns(2)
+        input_col5, input_col6 = st.columns(2)
+
+        name = input_col1.text_input("Name", placeholder="e.g., Taxi, Coffee...")
+        amount = input_col2.number_input("Amount", min_value=0)
+        time = input_col3.time_input("Time")
+        date = input_col4.date_input("Date")
+        category = input_col5.selectbox("Category", categories)
+        notes = input_col6.text_input("Notes", placeholder="Optional...")
+
+        button_col1, button_col2 = st.columns(2)
+
+        if button_col1.button("Add", type="primary"):
+            if not name.strip():
+                error_text.error("❗ Name cannot be empty")
+                return
+
+            if amount <= 0:
+                error_text.error("❗ Please enter a numeric amount greater than 0")
+                return
+
+            new_row = {
+                "Date": date.strftime("%d-%m-%Y"),
+                "Time": time.strftime("%H:%M"),
+                "Name": name.strip().title(),
+                "Amount": int(amount),
+                "Category": category,
+                "Notes": notes.strip().title() if notes else np.nan
+            }
+
+            df2 = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            df2_size = len(df2)
+
+            duplicates = ["Date", "Name", "Amount", "Category", "Notes"]
+            df2 = df2.drop_duplicates(subset=duplicates).reset_index(drop=True)
+            df2.to_csv(filename, index=False)
+
+            if len(df2) == df2_size:
+                st.session_state.show_add_popup = False
+                st.toast("Expense Added Successfully")
+                tm.sleep(0.5)
+                st.rerun()
+            else:
+                error_text.error("❗ Expense already Added, pls try different values. Or if you want duplicates try adding Notes")
+
+        if button_col2.button("Cancel"):
+            st.session_state.show_add_popup = False
+            st.rerun()
+
+    add_expense_popup()
+
+# ----------------- DELETE POPUP -----------------
+if "show_delete" not in st.session_state:
+    st.session_state.show_delete = False
+if st.session_state.open_delete_flag and not df.empty:
+    st.session_state.show_delete = True
+    st.session_state.open_delete_flag = False
+
+if st.session_state.show_delete:
+    st.session_state.show_delete = False
+    @st.dialog("Delete an Expense")
+    def delete_expense_popup():
+        st.write("Select an expense you want to delete")
+        df_local = df.reset_index()
+        df_local["label"] = df_local["Date"] + " | " + df_local["Name"] + " | ₹" + df_local["Amount"].astype(str)
+        choice = st.selectbox("Expense:", df_local["label"])
+        delete_col, empty_col1, empty_col2, cancel_col = st.columns(4)
+
+        if delete_col.button("Delete", type="primary"):
+            idx = df_local[df_local["label"] == choice]["index"].iloc[0]
+            df2 = df_local.drop(idx).reset_index(drop=True)
+            df2 = df2[column_list]
+            df2.to_csv(filename, index=False)
+            st.toast("Expense Deleted successfully")
+            tm.sleep(0.5)
+            st.session_state.show_delete = False
+            st.rerun()
+
+        if cancel_col.button("Cancel"):
+            st.session_state.show_delete = False
+            st.rerun()
+            
+    delete_expense_popup()
+
+# ----------------- CLEAR ALL CONFIRMATION POPUP -----------------
+if st.session_state.show_clear_popup:
+    st.session_state.show_clear_popup = False
+
+    @st.dialog("Confirm Clear All")
+    def confirmation_popup():
+        st.write("This will delete all expenses permanently.")
+        st.write("Are you sure you want to proceed?")
+
+        col1, col2 = st.columns(2)
+        if col1.button("Yes, Clear All", type="primary"):
+            df = pd.DataFrame(columns=column_list)
+            df.to_csv(filename, index=False)
+            st.toast("All expenses cleared")
+            tm.sleep(0.5)
+            st.session_state.clear_all_flag = False
+            st.rerun()
+
+        if col2.button("Cancel"):
+            st.session_state.clear_all_flag = False
+            st.rerun()
+
+    confirmation_popup()
+
+
+#--------------------EMPTY PAGE----------------------
+st.markdown("""
+<style>
+.empty-card { padding: 80px; border-radius: 25px; background: linear-gradient(45deg, #63c3a488, #000000, #046276);
+    text-align: center; color: lightyellow; margin-top: 40px; box-shadow: 0 0 5px rgba(255,255,255,0.35);}
+.empty-title { font-size: 50px; margin-bottom: 20px; font-weight: bold; }
+.empty-desc { font-size: 25px; opacity: 0.85; margin-bottom: 25px; }
+.empty-bullets { font-size: 20px; text-align: left; margin: 0 auto; max-width: 350px; opacity: 0.9; }
+</style>
+""", unsafe_allow_html=True)
+
+if df.empty:
+    st.markdown("""
+    <div class="empty-card">
+        <div class="empty-title">📊 WELCOME TO EXPENSE TRACKER</div>
+        <div class="empty-desc">Start tracking your spendings.</div>
+        <ul class="empty-bullets">
+            <li>Add/Delete expenses using the Add button below</li>
+            <li>View category and date summaries</li>
+            <li>View and Interact with Line, Pie, and Bar Charts</li>
+        </ul>
+        <br>
+        <div style="opacity:0.85;margin-top:15px;font-size:18px;color:yellow;">
+            BEGIN BY ADDING YOUR FIRST EXPENSE USING THE "ACTIONS" BUTTON AT BOTTOM-RIGHT
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("")
+    st.markdown("")
+    st.markdown("---")
+
+    dummy_cat = pd.DataFrame({
+        "Category": ["Food", "Bills", "Shopping", "Health", "Others"],
+        "Amount": np.random.randint(30,80,5)
+    })
+    col1, col2 = st.columns(2)
+
+    col1.plotly_chart(bar(dummy_cat, 'Category', "Top 5 Expenses (Bar)"), width='stretch')
+    col2.plotly_chart(pie(dummy_cat, 'Category', "Top 5 Expenses (Pie)"), width='stretch')
+
+    # ---------- AREA CHART ----------
+    dummy_dates = ["01-Jan-2025", "02-Jan-2025", "03-Jan-2025", "04-Jan-2025", "05-Jan-2025", "07-Jan-2025", "10-Jan-2025"]
+    dummy_amounts = np.random.randint(10, 80, 7)
+
+    fig_dummy_area = area(dummy_dates, dummy_amounts, 'Date', "Line Chart (Demo)", )
+    fig_dummy_area.update_layout(title="Line Chart (Demo)")
+    st.plotly_chart(fig_dummy_area, width='stretch')
+    st.stop()
+
+
+#=========================== Main APP ==========================#
 
 #------------Page Title----------------
-st.header('EXPENSE TRACKER')
+st.markdown("""
+<style>
+.main-title { font-size: 4em; font-weight: 900; color: transparent; letter-spacing: 3px; 
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.4); padding-bottom: 10px; margin-bottom: 0px; 
+    background: linear-gradient(45deg, #eeeeee, #63c3a4, #eeeeee, #eeeeee, #eeeeee); background-clip: text; }
+</style>
+<div class="main-title">EXPENSE TRACKER</div>
+""", unsafe_allow_html=True)
+
 st.markdown('---')
 
 #---------------Highest/Total etc---------
@@ -71,11 +299,29 @@ df_group = df.groupby('Name')['Amount'].max()
 df_max_name = df_group.idxmax()
 df_len = len(df)
 
-col1, col2, col3 = st.columns(3)
+col1, emp1, col2, emp2, col3 = st.columns([2, 0.35, 2, 0.35 ,2])
 
-col1.metric("Total Spent", "₹" + str(df_total))
-col2.metric("Highest Expense", "₹" + str(df_max), df_max_name)
-col3.metric("Total Count", df_len)
+col1.markdown(f"""
+    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #eeeeee, #046276); color: black; text-align: center; height: 100px;">
+        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">💰 TOTAL SPENT</p>
+        <h1 style="margin: 0; font-size: 26px;">₹{df_total}</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+col2.markdown(f"""
+    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #046276, #eeeeee, #63c3a488); color: black; text-align: center; height: 100px;">
+        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">📈 HIGHEST EXPENSE</p>
+        <h1 style="margin: 0; font-size: 26px;">₹{df_max} ({df_max_name})</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+col3.markdown(f"""
+    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #eeeeee, #046276); color: black; text-align: center; height: 100px;">
+        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">🔢 TOTAL TRANSACTIONS</p>
+        <h1 style="margin: 0; font-size: 26px;">{df_len}</h1>
+    </div>
+""", unsafe_allow_html=True)
+
 st.markdown('---')
 
 #---------------MAin Table----------
@@ -121,8 +367,10 @@ with st.expander("Category Overview"):
         col2.plotly_chart(pie(cat_chart, 'Category', "Top 5 Categories (Pie)"), width='stretch')
 
     with tab2:
-        st.plotly_chart(area(x,y, 'Category', "Category-wise Spending"))
-
+        if len(y) > 2:
+            st.plotly_chart(area(x,y, 'Category', "Category-wise Spending"))
+        else:
+            st.error("❕ Not Enought Data, Add At Least 3 Different Categories for a Line Chart")
     with tab3:
         st.markdown('Top Categories by Amount (Table)')
         st.dataframe(display_formatting(cat_table))
@@ -153,8 +401,12 @@ with st.expander("Date Overview"):
         col2.plotly_chart(pie(date_chart, 'Date', "Top 5 Dates (Pie)"), width='stretch')
 
     with tab2:
-        st.plotly_chart(area(x,y, 'Date', 'Spending Over Time'))
-
+        if len(y) > 2:
+            st.plotly_chart(area(x,y, 'Date', 'Spending Over Time'))
+        else:
+            st.error("❕ Not Enought Data, Add At Least 3 Different Dates for a Line Chart")
     with tab3:
         st.markdown('Top Dates by Amount (Table)')
         st.dataframe(display_formatting(date_table))
+
+

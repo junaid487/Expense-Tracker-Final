@@ -1,18 +1,17 @@
 Date,Time,Name,Amount,Category,Notes
 01-01-2025,09:10,Coffee,120,Food,
 01-01-2025,19:30,Snacks,180,Food,
-02-01-2025,10:45,Groceries,120,Shopping,
+02-01-2025,10:45,Groceries,320,Shopping,
 02-01-2025,21:15,Taxi,140,Transport,
 03-01-2025,11:20,Coffee,150,Food,
-03-01-2025,20:10,Dinner,420,Entertainment,With friends
 04-01-2025,09:00,Coffee,130,Food,
-04-01-2025,18:50,Shirt,360,Shopping,
+04-01-2025,18:50,Groceries,360,Shopping,
 05-01-2025,14:10,Books,280,Education,
 06-01-2025,20:30,Movie,300,Entertainment,
 07-01-2025,08:40,Coffee,140,Food,
 08-01-2025,17:20,Groceries,380,Shopping,Weekly restock
 09-01-2025,12:00,Taxi,160,Transport,
-10-01-2025,19:45,Lunch,450,Entertainment,Weekend
-10-01-2025,22:10,Snacks,210,Food,
-03-01-2025,22:10,something,300,Other,
-03-01-2025,22:10,something2,100,Other,
+10-01-2025,19:45,Dinner,450,Entertainment,Weekend
+03-12-2025,19:44,Shirt,800,Shopping,
+16-12-2025,19:48,Python Course,600,Education,
+16-12-2025,19:52,Pizza,400,Food,
