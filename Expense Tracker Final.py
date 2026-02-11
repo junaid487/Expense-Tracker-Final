@@ -1,17 +1,11 @@
-# TODO 
-# Next work on FAB - high priority --- Done
-# Add Export actions 
-# Then on filters if needed
-
 import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
-from streamlit_float import *
+from streamlit_float import float_init
 import io
-import matplotlib.pyplot as plt
-import time as tm
+import time as t
 
 st.set_page_config(page_title="Expense Tracker", layout="wide")
 float_init()
@@ -19,30 +13,32 @@ float_init()
 #------------------------------------
 filename = "expense_tracker.csv"
 column_list = ["Date", "Time", "Name", "Amount", "Category", "Notes"]
-categories = ['Food','Transport','Shopping','Bills','Entertainment','Health','Travel','Education','Other']
+all_categories = ['Food','Transport','Shopping','Bills','Entertainment','Health','Travel','Education','Other']
 
 try:
     df = pd.read_csv(filename)
 except:
     df = pd.DataFrame(columns=column_list)
 
+df_filter = df.copy()
+df_filter["date_dt"] = pd.to_datetime(df_filter["Date"], format="%d-%m-%Y", errors="coerce")
 
 #--------------Helper Functions------------
 # bar chart
 def bar(df,a,_title):
-    fig = px.bar(df, x= a, y= 'Amount', title= _title, text= 'Amount', color= a, color_discrete_sequence=px.colors.qualitative.Set2)
+    fig = px.bar(df, x= a, y= 'Amount', title= _title, text= 'Amount', color= a, color_discrete_sequence=px.colors.sequential.Teal_r)    #qualitative.Set2
     fig.update_traces(width=0.6)
     return fig
 
 # Pie chart
 def pie(df,name,_title):
-    fig = px.pie(df, names=name, values='Amount', title= _title, hole=0.4, color_discrete_sequence=px.colors.qualitative.Set2)
+    fig = px.pie(df, names=name, values='Amount', title= _title, hole=0.4, color_discrete_sequence= px.colors.sequential.Teal_r)
     return fig
 
 #Area chart
 def area(a,b,x_title,_title):
-    base_color = px.colors.qualitative.Set2[0]
-    fade_color = "rgba(90, 196, 163, 0.2)"
+    base_color = px.colors.sequential.Teal_r[0]
+    fade_color = "rgba(34, 89, 121, 0.4)"
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=a, y=b, mode="lines", line=dict(color=base_color, width=2, shape="spline", smoothing=1.2), fill="tozeroy", fillcolor=fade_color))
     fig.add_trace(go.Scatter(x=a, y=b, mode="markers", marker=dict(size=7, color='lightgrey')))
@@ -52,13 +48,25 @@ def area(a,b,x_title,_title):
 # df
 def display_formatting(df):
     df_display = df.copy()
+    if "date_dt" in df_display.columns:
+        df_display = df_display.drop(columns=["date_dt"])
+
     df_display['S.no'] = df_display.index + 1
     df_display['Amount'] = "₹" + df_display['Amount'].astype(str)
+
     if 'Date' in df_display.columns:
         df_display['Date'] = pd.to_datetime(df_display['Date'], format="%d-%m-%Y")
         df_display['Date'] = df_display['Date'].dt.strftime("%d-%b-%Y")
+
     df_display = df_display.set_index('S.no', drop=True)
     return df_display
+#------------------------------------------------------------------
+
+def get_excel_bytes(df):
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Expenses")
+    return buffer.getvalue()
 
 
 # =================== FLOATING ACTION BUTTON(FAB) ===================
@@ -86,23 +94,23 @@ with fab_container:
     st.markdown('<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">', unsafe_allow_html=True)
     if st.session_state.show_fab_menu:
 
-        if st.button("➕ Add Expense", key="fab_add_expense", type="secondary", width='stretch'):
+        if st.button("➕ Add Expense", type= "secondary", width= 'stretch'):
             st.session_state.open_add_flag = True
             toggle_fab_menu()
             st.rerun()
             
-        if st.button("🗑️ Delete Expense", key="fab_delete_expense", type="secondary", disabled=df.empty, width='stretch'):
+        if st.button("🗑️ Delete Expense", type= "secondary", disabled= df.empty, width= 'stretch'):
             st.session_state.open_delete_flag = True
             toggle_fab_menu()
             st.rerun()
             
-        if st.button("🔥 Clear All", key="fab_clear_all", type="secondary", disabled=df.empty, width='stretch'):
+        if st.button("🔥 Clear All", type= "secondary", disabled= df.empty, width= 'stretch'):
             st.session_state.show_clear_popup = True
             toggle_fab_menu()
             st.rerun()
             
     main_button_label = "❌ Close Menu" if st.session_state.show_fab_menu else "➕ Actions"
-    st.button(main_button_label, on_click=toggle_fab_menu, key="main_fab_toggle", type="primary")
+    st.button(main_button_label, on_click=toggle_fab_menu, type= "primary")
     st.markdown('</div>', unsafe_allow_html=True)
 
 fab_container.float("bottom: 20px; right: 20px; width: 170px; z-index: 1000;")
@@ -126,12 +134,12 @@ if st.session_state.show_add_popup:
         amount = input_col2.number_input("Amount", min_value=0)
         time = input_col3.time_input("Time")
         date = input_col4.date_input("Date")
-        category = input_col5.selectbox("Category", categories)
+        category = input_col5.selectbox("Category", all_categories)
         notes = input_col6.text_input("Notes", placeholder="Optional...")
 
         button_col1, button_col2 = st.columns(2)
 
-        if button_col1.button("Add", type="primary"):
+        if button_col1.button("Add", type="primary", width= 'stretch'):
             if not name.strip():
                 error_text.error("❗ Name cannot be empty")
                 return
@@ -159,12 +167,12 @@ if st.session_state.show_add_popup:
             if len(df2) == df2_size:
                 st.session_state.show_add_popup = False
                 st.toast("Expense Added Successfully")
-                tm.sleep(0.5)
+                t.sleep(0.5)
                 st.rerun()
             else:
                 error_text.error("❗ Expense already Added, pls try different values. Or if you want duplicates try adding Notes")
 
-        if button_col2.button("Cancel"):
+        if button_col2.button("Cancel", width= 'stretch'):
             st.session_state.show_add_popup = False
             st.rerun()
 
@@ -185,19 +193,19 @@ if st.session_state.show_delete:
         df_local = df.reset_index()
         df_local["label"] = df_local["Date"] + " | " + df_local["Name"] + " | ₹" + df_local["Amount"].astype(str)
         choice = st.selectbox("Expense:", df_local["label"])
-        delete_col, empty_col1, empty_col2, cancel_col = st.columns(4)
+        delete_col, cancel_col = st.columns(2)
 
-        if delete_col.button("Delete", type="primary"):
+        if delete_col.button("Delete", type="primary", width= 'stretch'):
             idx = df_local[df_local["label"] == choice]["index"].iloc[0]
             df2 = df_local.drop(idx).reset_index(drop=True)
             df2 = df2[column_list]
             df2.to_csv(filename, index=False)
             st.toast("Expense Deleted successfully")
-            tm.sleep(0.5)
+            t.sleep(0.5)
             st.session_state.show_delete = False
             st.rerun()
 
-        if cancel_col.button("Cancel"):
+        if cancel_col.button("Cancel", width= 'stretch'):
             st.session_state.show_delete = False
             st.rerun()
             
@@ -217,7 +225,7 @@ if st.session_state.show_clear_popup:
             df = pd.DataFrame(columns=column_list)
             df.to_csv(filename, index=False)
             st.toast("All expenses cleared")
-            tm.sleep(0.5)
+            t.sleep(0.5)
             st.session_state.clear_all_flag = False
             st.rerun()
 
@@ -231,11 +239,12 @@ if st.session_state.show_clear_popup:
 #--------------------EMPTY PAGE----------------------
 st.markdown("""
 <style>
-.empty-card { padding: 80px; border-radius: 25px; background: linear-gradient(45deg, #63c3a488, #000000, #046276);
-    text-align: center; color: lightyellow; margin-top: 40px; box-shadow: 0 0 5px rgba(255,255,255,0.35);}
+.empty-card { padding: 80px; border-radius: 25px; background: linear-gradient(45deg, #223645, #000000, #046276);
+    text-align: center; color: lightyellow; margin-top: 40px; box-shadow: 0 0 10px rgba(255,255,255,0.35);}
 .empty-title { font-size: 50px; margin-bottom: 20px; font-weight: bold; }
 .empty-desc { font-size: 25px; opacity: 0.85; margin-bottom: 25px; }
 .empty-bullets { font-size: 20px; text-align: left; margin: 0 auto; max-width: 350px; opacity: 0.9; }
+.empty-card:hover { filter: brightness(1.15) saturate(1.2); box-shadow: 0 0 15px rgba(0,128,128,0.25); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -265,8 +274,8 @@ if df.empty:
     })
     col1, col2 = st.columns(2)
 
-    col1.plotly_chart(bar(dummy_cat, 'Category', "Top 5 Expenses (Bar)"), width='stretch')
-    col2.plotly_chart(pie(dummy_cat, 'Category', "Top 5 Expenses (Pie)"), width='stretch')
+    col1.plotly_chart(bar(dummy_cat, 'Category', "Top 5 Expenses (Bar - Demo)"), width='stretch')
+    col2.plotly_chart(pie(dummy_cat, 'Category', "Top 5 Expenses (Pie - Demo)"), width='stretch')
 
     # ---------- AREA CHART ----------
     dummy_dates = ["01-Jan-2025", "02-Jan-2025", "03-Jan-2025", "04-Jan-2025", "05-Jan-2025", "07-Jan-2025", "10-Jan-2025"]
@@ -292,31 +301,176 @@ st.markdown("""
 
 st.markdown('---')
 
-#---------------Highest/Total etc---------
-df_total = df['Amount'].sum()
-df_max = df['Amount'].max()
-df_group = df.groupby('Name')['Amount'].max()
-df_max_name = df_group.idxmax()
-df_len = len(df)
+start_date = None
+end_date = None
 
-col1, emp1, col2, emp2, col3 = st.columns([2, 0.35, 2, 0.35 ,2])
+#------------------------------------ Filters/Search/Export --------------------------------
+min_date = df_filter["date_dt"].min().date()
+max_date = df_filter["date_dt"].max().date()
+
+with st.expander("🔍 Filters/Search/Export", expanded=False):
+
+# ---------- DATE PRESET + RANGE ----------
+    preset_col, _, date_col, _ = st.columns([2, 0.3, 3, 0.1])
+
+    preset_list = ["None", "Last 7 Days", "This Month", "Last Month", "This Year", "Last Year"]
+    preset = preset_col.selectbox("Preset", preset_list, index=0)
+
+    with date_col:
+        if min_date == max_date:
+            st.info(f"**Slider Disabled:** Only one date exists ({min_date.strftime('%d-%b-%Y')})")
+            start_date = min_date
+            end_date = min_date
+
+        elif preset == "None":
+            start_date, end_date = st.slider("Date Range", min_value= min_date, max_value= max_date, value=(min_date, max_date))
+
+        else:
+            st.info("Slider disabled: Date range is controlled by the selected preset.")
+
+
+    # ---------- CATEGORY + AMOUNT ----------
+    cat_col, _, amt_col, _ = st.columns([2, 0.3, 3, 0.1])
+
+    categories = sorted(df_filter["Category"].dropna().unique())
+
+    selected_categories = cat_col.multiselect(
+        "Categories",
+        options=categories
+    )
+
+    if not df_filter.empty:
+        min_amt = int(df_filter["Amount"].min())
+        max_amt = int(df_filter["Amount"].max())
+
+    else:
+        min_amt = max_amt = 0
+
+    if min_amt == max_amt:
+        amt_col.info(f"**Slider Disabled:** Only One Amount(₹{min_amt}) exists")
+        amount_range = (min_amt, max_amt)
+    else:
+        amount_range = amt_col.slider("Amount Range", min_value=min_amt, max_value=max_amt, value=(min_amt, max_amt))
+
+    # ---------- SEARCH ----------
+    search_col, csv_col, excel_col = st.columns([4, 1, 1])
+    search_query = search_col.text_input("Search (Name / Notes)", placeholder="Search by name or notes")
+    
+    with csv_col:
+        st.markdown("<br>", unsafe_allow_html=True)
+        csv_placeholder = csv_col.empty()
+    
+    with excel_col:
+        st.markdown("<br>", unsafe_allow_html=True)
+        excel_placeholder = excel_col.empty()
+
+st.markdown('---')
+
+# ---------- APPLY PRESET ----------
+today = pd.Timestamp.today().date()
+
+if preset != "None":
+
+    if preset == "Last 7 Days":
+        start_date = max((pd.Timestamp.today() - pd.Timedelta(days=6)).date(), min_date)
+        end_date = min(today, max_date)
+
+    elif preset == "This Month":
+        start_date = max(pd.Timestamp.today().replace(day=1).date(), min_date)
+        end_date = min(today, max_date)
+
+    elif preset == "Last Month":
+        start_date = max((pd.Timestamp.today().replace(day=1) - pd.Timedelta(days=1)).replace(day=1).date(), min_date)
+        end_date = min((pd.Timestamp.today().replace(day=1) - pd.Timedelta(days=1)).date(), max_date)
+
+    elif preset == "This Year":
+        start_date = max(pd.Timestamp.today().replace(month=1, day=1).date(), min_date)
+        end_date = min(today, max_date)
+
+    elif preset == "Last Year":
+        start_date = max(pd.Timestamp.today().replace(year=today.year - 1, month=1, day=1).date(), min_date)
+        end_date = min(pd.Timestamp.today().replace(year=today.year - 1, month=12, day=31).date(), max_date)
+
+
+#------------------------filtered-df--------------------------
+filtered_df = df_filter.copy()
+
+if start_date is not None and end_date is not None:
+    start_ts = pd.Timestamp(start_date)
+    end_ts = pd.Timestamp(end_date)
+
+    filtered_df = filtered_df[(filtered_df["date_dt"] >= start_ts) & (filtered_df["date_dt"] <= end_ts)]
+
+if selected_categories:
+    filtered_df = filtered_df[filtered_df["Category"].isin(selected_categories)]
+
+filtered_df = filtered_df[(filtered_df["Amount"] >= amount_range[0]) & (filtered_df["Amount"] <= amount_range[1])]
+
+if search_query.strip():
+    q = search_query.lower()
+
+    filtered_df = filtered_df[filtered_df["Name"].str.lower().str.contains(q, na=False) | filtered_df["Notes"].str.lower().str.contains(q, na=False)]
+
+filtered_df = filtered_df.reset_index(drop=True)
+
+#--------------------------------------------------------------
+#Export buttons behaviour
+export_df = filtered_df.drop(columns=["date_dt"], errors="ignore")
+can_export = not filtered_df.empty
+
+
+with csv_placeholder:
+    st.download_button(
+        label= "Export CSV",
+        data= export_df.to_csv(index=False) if can_export else "",
+        file_name= "expenses_filtered.csv",
+        mime= "text/csv",
+        disabled= not can_export,
+        width= "stretch"
+    )
+
+with excel_placeholder:
+    st.download_button(
+        label= "Export Excel",
+        data= get_excel_bytes(export_df) if can_export else b"",
+        file_name= "expenses_filtered.xlsx",
+        mime= "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        disabled= not can_export,
+        width= "stretch"
+    )
+
+
+
+#---------------Highest/Total etc---------
+df_total = filtered_df['Amount'].sum() if not filtered_df.empty else 0
+df_max = filtered_df['Amount'].max() if not filtered_df.empty else 0
+df_group = filtered_df.groupby('Name')['Amount'].max()
+df_max_name = f"({df_group.idxmax()})" if not df_group.empty else ""
+df_len = len(filtered_df)
+
+col1, _, col2, _, col3 = st.columns([2, 0.35, 2, 0.35 ,2])
+
+st.markdown("""<style>
+.card {transition: transform .2s ease;}
+.card:hover {filter: brightness(1.25) saturate(1.2);}
+</style>""", unsafe_allow_html=True)
 
 col1.markdown(f"""
-    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #eeeeee, #046276); color: black; text-align: center; height: 100px;">
-        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">💰 TOTAL SPENT</p>
-        <h1 style="margin: 0; font-size: 26px;">₹{df_total}</h1>
-    </div>
+    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #333333, #046276); color: white; text-align: center; height: 100px;">
+    <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">💰 TOTAL SPENT</p>
+    <h1 style="margin: 0; font-size: 26px;">₹{df_total}</h1>
+</div>
 """, unsafe_allow_html=True)
 
 col2.markdown(f"""
-    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #046276, #eeeeee, #63c3a488); color: black; text-align: center; height: 100px;">
+    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #046276, #333333, #63c3a488); color: white; text-align: center; height: 100px;">
         <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">📈 HIGHEST EXPENSE</p>
-        <h1 style="margin: 0; font-size: 26px;">₹{df_max} ({df_max_name})</h1>
+        <h1 style="margin: 0; font-size: 26px;">₹{df_max} {df_max_name}</h1>
     </div>
 """, unsafe_allow_html=True)
 
 col3.markdown(f"""
-    <div style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #eeeeee, #046276); color: black; text-align: center; height: 100px;">
+    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #333333, #046276); color: white; text-align: center; height: 100px;">
         <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">🔢 TOTAL TRANSACTIONS</p>
         <h1 style="margin: 0; font-size: 26px;">{df_len}</h1>
     </div>
@@ -325,88 +479,101 @@ col3.markdown(f"""
 st.markdown('---')
 
 #---------------MAin Table----------
-df_show = display_formatting(df)
-st.dataframe(df_show)
+df_show = display_formatting(filtered_df)
+if not df_show.empty:
+    st.dataframe(df_show)
+else:
+    st.info("No expenses match the current filters.")
 
 #-----------------------------Charts/Tables/etc-----------------------------
 #1. Top 5 Expenses
-top5 = df.sort_values(by= 'Amount', ascending=False).head().reset_index(drop=True)
+top5 = filtered_df.sort_values(by= 'Amount', ascending=False).head().reset_index(drop=True)
 
 with st.expander("Top 5 Expenses", expanded=True):
-    st.text('',help='you can always switch between Chart and Table mode using the tabs below')
-    tab1, tab2 = st.tabs(["📊 Bar & Pie(Charts)", '📄 Table'])
-    
-    with tab1:
-        col1, col2 = st.columns(2)
+    if top5.empty:
+        st.info("No data available for TOP 5 with current filters.")
 
-        col1.plotly_chart(bar(top5, 'Name', "Top 5 Expenses (Bar)"), width='stretch')
-        col2.plotly_chart(pie(top5, 'Name', "Top 5 Expenses (Pie)"), width='stretch')
+    else:
+        st.text('',help='you can always switch between Chart and Table mode using the tabs below')
+        tab1, tab2 = st.tabs(["📊 Bar & Pie(Charts)", '📄 Table'])
+        
+        with tab1:
+            col1, col2 = st.columns(2)
 
-    with tab2:
-        st.markdown('Top 5 Expenses (Table)')
-        st.dataframe(display_formatting(top5))
+            col1.plotly_chart(bar(top5, 'Name', "Top 5 Expenses (Bar)"), width='stretch')
+            col2.plotly_chart(pie(top5, 'Name', "Top 5 Expenses (Pie)"), width='stretch')
+
+        with tab2:
+            st.markdown('Top 5 Expenses (Table)')
+            st.dataframe(display_formatting(top5))
 
 #2. Category
-cat = df.groupby('Category')['Amount'].sum().sort_values(ascending=False).reset_index()
+cat = filtered_df.groupby('Category')['Amount'].sum().sort_values(ascending=False).reset_index()
 cat_chart = cat.head()
 
 cat_table = cat.copy()
-cat_table['Expense count'] = df.groupby("Category")["Amount"].count().reindex(cat_table['Category']).values
+cat_table['Expense count'] = filtered_df.groupby("Category")["Amount"].count().reindex(cat_table['Category']).values
 cat_table = cat_table.sort_values(by= 'Amount', ascending=False)
 
-cat_line = df.groupby('Category')['Amount'].sum().reset_index()
+cat_line = filtered_df.groupby('Category')['Amount'].sum().reset_index()
 x = cat_line['Category']
 y = cat_line['Amount']
 
 with st.expander("Category Overview"):
-    tab1, tab2, tab3 = st.tabs(["📊 Bar & Pie(Charts)", '📈 Line Chart', '📄 Table'])
+    if cat.empty:
+        st.info("No data available for Category with current filters.")
+    else:
+        tab1, tab2, tab3 = st.tabs(["📊 Bar & Pie(Charts)", '📈 Line Chart', '📄 Table'])
 
-    with tab1:
-        col1, col2 = st.columns(2)
-        col1.plotly_chart(bar(cat_chart, 'Category', "Top 5 Categories (Bar)"), width='stretch')
-        col2.plotly_chart(pie(cat_chart, 'Category', "Top 5 Categories (Pie)"), width='stretch')
+        with tab1:
+            col1, col2 = st.columns(2)
+            col1.plotly_chart(bar(cat_chart, 'Category', "Top 5 Categories (Bar)"), width='stretch')
+            col2.plotly_chart(pie(cat_chart, 'Category', "Top 5 Categories (Pie)"), width='stretch')
 
-    with tab2:
-        if len(y) > 2:
-            st.plotly_chart(area(x,y, 'Category', "Category-wise Spending"))
-        else:
-            st.error("❕ Not Enought Data, Add At Least 3 Different Categories for a Line Chart")
-    with tab3:
-        st.markdown('Top Categories by Amount (Table)')
-        st.dataframe(display_formatting(cat_table))
+        with tab2:
+            if len(y) > 2:
+                st.plotly_chart(area(x,y, 'Category', "Category-wise Spending"))
+            else:
+                st.info("Not Enought Data, Add At Least 3 Different Categories for a Line Chart")
+        with tab3:
+            st.markdown('Top Categories by Amount (Table)')
+            st.dataframe(display_formatting(cat_table))
 
-# 3. Date
-date_df = df.groupby("Date")['Amount'].sum().sort_values(ascending=False).reset_index()
+# 3. Date.
+date_df = filtered_df.groupby("Date")['Amount'].sum().sort_values(ascending=False).reset_index()
 date_chart = date_df.head()
 date_chart['Date'] = pd.to_datetime(date_chart['Date'], format="%d-%m-%Y", errors= 'coerce')
 date_chart['Date'] = date_chart['Date'].dt.strftime("%d-%b-%Y")
 
-date_line = df.groupby("Date")['Amount'].sum().reset_index()
+date_line = filtered_df.groupby("Date")['Amount'].sum().reset_index()
 date_line['Date'] = pd.to_datetime(date_line['Date'], format="%d-%m-%Y", errors= 'coerce')
 date_line['Date'] = date_line['Date'].dt.strftime("%d-%b-%Y")
 x = date_line['Date']
 y = date_line['Amount']
 
 date_table = date_df.copy()
-date_table['Expense Count'] = df.groupby("Date")["Amount"].count().reindex(date_table['Date']).values
+date_table['Expense Count'] = filtered_df.groupby("Date")["Amount"].count().reindex(date_table['Date']).values
 
 
 with st.expander("Date Overview"):
-    tab1, tab2, tab3 = st.tabs(["📊 Bar & Pie(Charts)", '📈 Line Chart', '📄 Table'])
+    if date_df.empty:
+        st.info("No data available for Date with current filters.")
+    else:
+        tab1, tab2, tab3 = st.tabs(["📊 Bar & Pie(Charts)", '📈 Line Chart', '📄 Table'])
 
-    with tab1:
-        col1, col2 = st.columns(2)
+        with tab1:
+            col1, col2 = st.columns(2)
 
-        col1.plotly_chart(bar(date_chart, 'Date', "Top 5 Dates (Bar)"), width='stretch')
-        col2.plotly_chart(pie(date_chart, 'Date', "Top 5 Dates (Pie)"), width='stretch')
+            col1.plotly_chart(bar(date_chart, 'Date', "Top 5 Dates (Bar)"), width='stretch')
+            col2.plotly_chart(pie(date_chart, 'Date', "Top 5 Dates (Pie)"), width='stretch')
 
-    with tab2:
-        if len(y) > 2:
-            st.plotly_chart(area(x,y, 'Date', 'Spending Over Time'))
-        else:
-            st.error("❕ Not Enought Data, Add At Least 3 Different Dates for a Line Chart")
-    with tab3:
-        st.markdown('Top Dates by Amount (Table)')
-        st.dataframe(display_formatting(date_table))
+        with tab2:
+            if len(y) > 2:
+                st.plotly_chart(area(x,y, 'Date', 'Spending Over Time'))
+            else:
+                st.info("Not Enought Data, Add At Least 3 Different Dates for a Line Chart")
+        with tab3:
+            st.markdown('Top Dates by Amount (Table)')
+            st.dataframe(display_formatting(date_table))
 
 
