@@ -1,4 +1,4 @@
-\# Expense Tracker — Streamlit App
+\# Expense Tracker — Streamlit App by Junaid Alam
 
 
 
@@ -31,9 +31,18 @@ This project focuses on \*\*clean data handling, UI responsiveness, and practica
 \- Clean, minimal UI with floating action controls
 
 
-
 ---
 
+
+\## Limitations
+
+-This application uses a single shared Google Sheet as its data store.
+
+-User authentication and data isolation are not implemented.
+
+-As a result, the app is intended for single-user usage.
+
+---
 
 
 \## Tech Stack
