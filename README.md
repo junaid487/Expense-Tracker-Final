@@ -1,4 +1,4 @@
-# Expense Tracker — Streamlit App
+# Expense Tracker | Streamlit App
 
 
 
