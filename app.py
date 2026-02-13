@@ -14,19 +14,16 @@ st.set_page_config(page_title="Expense Tracker", layout="wide")
 float_init()
 
 #---------------------------------------
+@st.cache_resource
 def get_gs_client():
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 
-    if "gcp_service_account" in st.secrets:
-        creds = Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=scopes
-        )
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=scopes
+    )
 
     return gspread.authorize(creds)
-
-SPREADSHEET_ID = "12QYnLxNedt623UW80Q7hFOFT41sPRsVjKH7FRp_cfqk"
-SHEET_NAME = "Sheet1"  # default unless you renamed it
 
 #------------------------------------
 
