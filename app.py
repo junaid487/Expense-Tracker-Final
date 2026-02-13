@@ -13,6 +13,9 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(page_title="Expense Tracker", layout="wide")
 float_init()
 
+SPREADSHEET_ID = "12QYnLxNedt623UW80Q7hFOFT41sPRsVjKH7FRp_cfqk"
+SHEET_NAME = "Sheet1"
+
 #---------------------------------------
 @st.cache_resource
 def get_gs_client():
