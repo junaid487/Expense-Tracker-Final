@@ -1,6 +1,8 @@
+streamlit
 pandas
 numpy
-streamlit
 plotly
-streamlit-float
 openpyxl
+streamlit-float
+gspread
+google-auth
