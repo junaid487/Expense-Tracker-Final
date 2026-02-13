@@ -1,172 +1,82 @@
 # Expense Tracker | Streamlit App
 
+A personal expense tracking web application built with Streamlit, pandas, and Plotly, featuring persistent storage using Google Sheets as a lightweight backend. 
 
+This project focuses on clean data handling, UI responsiveness, and practical engineering tradeoffs.
 
-A personal expense tracking web application built with **Streamlit**, **pandas**, and **Plotly**, featuring persistent storage using **Google Sheets** as a lightweight backend.
-
-
-
-This project focuses on **clean data handling, UI responsiveness, and practical tradeoffs**.
-
-
-
----
-
-
+## Live Demo
+[Check out the App](https://junaidexp.streamlit.app/)
 
 ## Features
-
-
-
-- Add, delete, and clear expenses
-
-- Category, date, and amount-based filtering
-
-- Interactive visualizations (Bar, Pie, Line charts)
-
-- CSV and Excel export
-
-- Persistent storage across sessions
-
-- Clean, minimal UI with floating action controls
-
-
----
-
-## Limitations
-
--This application uses a single shared Google Sheet as its data store.
-
--User authentication and data isolation are not implemented.
-
--As a result, the app is intended for single-user usage in its current state.
-
----
-
+* Full CRUD: Add, delete, and clear expenses.
+* Smart Filtering: Category, date range presets, and amount-based filtering.
+* Search: Real-time search across Name and Notes fields.
+* Visualizations: Interactive Plotly Bar, Pie, and Area charts.
+* Data Portability: Export filtered data to CSV or Excel.
+* Persistent Storage: Data remains safe across sessions via Google Sheets API.
+* Mobile-Friendly: Custom CSS and Floating Action Button for quick entry.
 
 ## Tech Stack
-
-
-
-- **Frontend / App Framework**: Streamlit  
-
-- **Data Handling**: pandas, NumPy  
-
-- **Visualization**: Plotly  
-
-- **Persistence Layer**: Google Sheets API  
-
-- **Auth**: Google Service Account  
-
-- **Deployment**: Streamlit Cloud
-
-
-
----
-
-
-
-## Why Google Sheets as a Backend?
-
-
-
-This project intentionally uses **Google Sheets** as a persistence layer instead of a traditional database.
-
-
-
-### Advantages
-
-- Completely free
-
-- Serverless and easy to manage
-
-- Secure via service-account–only access
-
-
-
-### Tradeoffs
-
-- Not designed for high concurrency
-
-- Higher latency compared to databases
-
-- Write operations are slower due to network calls
-
-
-
-This choice was made deliberately to balance **simplicity, security, and zero cost** for a single-user application.
-
-
-
-> For production or multi-user scenarios, this backend can be replaced with SQLite, Supabase, or PostgreSQL with minimal changes to the app logic.
-
-
-
----
-
-
-
-## Performance Considerations
-
-
-
-- Google Sheets access is cached using Streamlit’s caching primitives to reduce latency on reruns.
-
-- Cache invalidation is handled explicitly after write operations to ensure data consistency.
-
-- UI feedback (toasts) is used to improve perceived responsiveness.
-
-
-
----
-
-
-
-## Security Model
-
-
-
-- Google Sheet is **not public**
-
-- Access is restricted to a **single service account**
-
-- Credentials are stored securely using **Streamlit Secrets**
-
-- No user authentication data is stored
-
-
-
----
-
-
-
-## Design Philosophy
-
-
-
-- Prefer clarity over premature optimization
-
-- Treat data mutations as validated operations
-
-- Make calculated tradeoffs
-
-- Build portfolio projects as **real systems**
-
-
-
----
-
-
+* Frontend/Framework: Streamlit
+* Data Handling: pandas, NumPy
+* Visualization: Plotly
+* Persistence Layer: Google Sheets API (via st-gsheets-connection)
+* Auth: Google Service Account (OAuth2)
+* Deployment: Streamlit Cloud
+
+## Architecture and Decisions
+
+### Why Google Sheets as a Backend?
+This project intentionally uses Google Sheets as a persistence layer instead of a traditional SQL database.
+
+* Advantages: Completely free and serverless, and provides a built-in UI for manual data entry or backups.
+* Security: Access is restricted via a Google Service Account. Only the app (authenticated via a private key) can read or write data.
+* Tradeoffs: Designed for single-user scenarios. Not intended for high-traffic production environments due to API rate limits.
+
+### Design Philosophy
+* Clarity over Premature Optimization: Prioritized a clean user experience and robust error handling.
+* Data Integrity: Implemented duplicate detection and type validation before pushing to the cloud.
+* Performance: Utilized Streamlit’s caching to minimize network latency during data retrieval.
 
 ## Local Development
 
+To run this project locally, follow these steps:
 
+* Clone the repository:
+   git clone https://github.com/junaid487/Expense-Tracker-Final.git
+   cd Expense-Tracker-Final
 
-```bash
+* Install the required dependencies:
+   pip install -r requirements.txt
 
-pip install -r requirements.txt
+---
 
-streamlit run app.py
+Configure Streamlit Secrets:
+- The application requires a connection to Google Sheets via a Service Account. You must create a folder named .streamlit in the root directory and a file named secrets.toml inside it. Use the following structure:
 
+[connections.gsheets]
+spreadsheet = "[https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit](https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit)"
+type = "service_account"
+project_id = "your-project-id"
+private_key_id = "your-private-key-id"
+private_key = "-----BEGIN PRIVATE KEY-----\nYour-Key-Here\n-----END PRIVATE KEY-----\n"
+client_email = "your-service-account-email"
+client_id = "your-client-id"
+auth_uri = "[https://accounts.google.com/o/oauth2/auth](https://accounts.google.com/o/oauth2/auth)"
+token_uri = "[https://oauth2.googleapis.com/token](https://oauth2.googleapis.com/token)"
+auth_provider_x509_cert_url = "[https://www.googleapis.com/oauth2/v1/certs](https://www.googleapis.com/oauth2/v1/certs)"
+client_x509_cert_url = "your-cert-url"
 
+* Run the application:
+   streamlit run app.py
 
+## Limitations
+
+* This application uses a single shared Google Sheet as its data store.
+
+* User authentication and data isolation are not implemented.
+
+* As a result, the app is intended for single-user usage or demo purposes only.
+
+---
+Built with Python by Junaid Alam.
