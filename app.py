@@ -6,19 +6,67 @@ import plotly.graph_objects as go
 from streamlit_float import float_init
 import io
 import time as t
+import gspread
+from google.oauth2.service_account import Credentials
+
 
 st.set_page_config(page_title="Expense Tracker", layout="wide")
 float_init()
 
+#---------------------------------------
+def get_gs_client():
+    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+
+    if "gcp_service_account" in st.secrets:
+        creds = Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=scopes
+        )
+    else:
+        creds = Credentials.from_service_account_file(
+            r"C:\Users\JUNAID\Desktop\expense-tracker-streamlit-2e87e5052fb8.json",
+            scopes=scopes
+        )
+
+    return gspread.authorize(creds)
+
+SPREADSHEET_ID = "12QYnLxNedt623UW80Q7hFOFT41sPRsVjKH7FRp_cfqk"
+SHEET_NAME = "Sheet1"  # default unless you renamed it
+
 #------------------------------------
-filename = "expense_tracker.csv"
+
+@st.cache_data(ttl=30)  # seconds
+def load_expenses_from_sheet():
+    client = get_gs_client()
+    sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
+
+    records = sheet.get_all_records()
+    if not records:
+        return pd.DataFrame(columns=column_list)
+
+    return pd.DataFrame(records)
+
+
+def write_expenses_to_sheet(df):
+    client = get_gs_client()
+    sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
+
+    clean_df = (
+        df.replace([np.inf, -np.inf], "")
+          .fillna("")
+    )
+
+    sheet.clear()
+    sheet.update([clean_df.columns.values.tolist()] + clean_df.astype(str).values.tolist())
+
+
+
+#------------------------------------------------------
+
 column_list = ["Date", "Time", "Name", "Amount", "Category", "Notes"]
 all_categories = ['Food','Transport','Shopping','Bills','Entertainment','Health','Travel','Education','Other']
 
-try:
-    df = pd.read_csv(filename)
-except:
-    df = pd.DataFrame(columns=column_list)
+df = load_expenses_from_sheet()
 
 df_filter = df.copy()
 df_filter["date_dt"] = pd.to_datetime(df_filter["Date"], format="%d-%m-%Y", errors="coerce")
@@ -154,7 +202,7 @@ if st.session_state.show_add_popup:
                 "Name": name.strip().title(),
                 "Amount": int(amount),
                 "Category": category,
-                "Notes": notes.strip().title() if notes else np.nan
+                "Notes": notes.strip().title() if notes else ""
             }
 
             df2 = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -162,7 +210,9 @@ if st.session_state.show_add_popup:
 
             duplicates = ["Date", "Name", "Amount", "Category", "Notes"]
             df2 = df2.drop_duplicates(subset=duplicates).reset_index(drop=True)
-            df2.to_csv(filename, index=False)
+            write_expenses_to_sheet(df2)
+            load_expenses_from_sheet.clear()
+
 
             if len(df2) == df2_size:
                 st.session_state.show_add_popup = False
@@ -199,7 +249,8 @@ if st.session_state.show_delete:
             idx = df_local[df_local["label"] == choice]["index"].iloc[0]
             df2 = df_local.drop(idx).reset_index(drop=True)
             df2 = df2[column_list]
-            df2.to_csv(filename, index=False)
+            write_expenses_to_sheet(df2)
+            load_expenses_from_sheet.clear()
             st.toast("Expense Deleted successfully")
             t.sleep(0.5)
             st.session_state.show_delete = False
@@ -222,12 +273,14 @@ if st.session_state.show_clear_popup:
 
         col1, col2 = st.columns(2)
         if col1.button("Yes, Clear All", type="primary"):
-            df = pd.DataFrame(columns=column_list)
-            df.to_csv(filename, index=False)
-            st.toast("All expenses cleared")
-            t.sleep(0.5)
+            write_expenses_to_sheet(pd.DataFrame(columns=column_list))
+            load_expenses_from_sheet.clear()
+
             st.session_state.clear_all_flag = False
+            st.toast("All expenses cleared")
+
             st.rerun()
+
 
         if col2.button("Cancel"):
             st.session_state.clear_all_flag = False
