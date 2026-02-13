@@ -29,7 +29,7 @@ This project focuses on clean data handling, UI responsiveness, and practical en
 ### Why Google Sheets as a Backend?
 This project intentionally uses Google Sheets as a persistence layer instead of a traditional SQL database.
 
-* Advantages: Completely free and serverless, and provides a built-in UI for manual data entry or backups.
+* Advantages: Completely free and serverless.
 * Security: Access is restricted via a Google Service Account. Only the app (authenticated via a private key) can read or write data.
 * Tradeoffs: Designed for single-user scenarios. Not intended for high-traffic production environments due to API rate limits.
 
@@ -43,7 +43,7 @@ This project intentionally uses Google Sheets as a persistence layer instead of 
 To run this project locally, follow these steps:
 
 * Clone the repository:
-   git clone https://github.com/junaid487/Expense-Tracker-Final.git
+   git clone https://github.com/junaid487/Expense-Tracker-Final.git<br>
    cd Expense-Tracker-Final
 
 * Install the required dependencies:
@@ -54,21 +54,23 @@ To run this project locally, follow these steps:
 Configure Streamlit Secrets:
 - The application requires a connection to Google Sheets via a Service Account. You must create a folder named .streamlit in the root directory and a file named secrets.toml inside it. Use the following structure:
 
-[connections.gsheets]
-spreadsheet = "[https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit](https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit)"
-type = "service_account"
-project_id = "your-project-id"
-private_key_id = "your-private-key-id"
-private_key = "-----BEGIN PRIVATE KEY-----\nYour-Key-Here\n-----END PRIVATE KEY-----\n"
-client_email = "your-service-account-email"
-client_id = "your-client-id"
-auth_uri = "[https://accounts.google.com/o/oauth2/auth](https://accounts.google.com/o/oauth2/auth)"
-token_uri = "[https://oauth2.googleapis.com/token](https://oauth2.googleapis.com/token)"
-auth_provider_x509_cert_url = "[https://www.googleapis.com/oauth2/v1/certs](https://www.googleapis.com/oauth2/v1/certs)"
-client_x509_cert_url = "your-cert-url"
+[connections.gsheets]<br>
+spreadsheet = "[https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit](https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit)"<br>
+type = "service_account"<br>
+project_id = "your-project-id"<br>
+private_key_id = "your-private-key-id"<br>
+private_key = "-----BEGIN PRIVATE KEY-----\nYour-Key-Here\n-----END PRIVATE KEY-----\n"<br>
+client_email = "your-service-account-email"<br>
+client_id = "your-client-id"<br>
+auth_uri = "[https://accounts.google.com/o/oauth2/auth](https://accounts.google.com/o/oauth2/auth)"<br>
+token_uri = "[https://oauth2.googleapis.com/token](https://oauth2.googleapis.com/token)"<br>
+auth_provider_x509_cert_url = "[https://www.googleapis.com/oauth2/v1/certs](https://www.googleapis.com/oauth2/v1/certs)"<br>
+client_x509_cert_url = "your-cert-url"<br>
 
 * Run the application:
    streamlit run app.py
+
+---
 
 ## Limitations
 
