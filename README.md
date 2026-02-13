@@ -31,9 +31,17 @@ This project focuses on **clean data handling, UI responsiveness, and practical 
 - Clean, minimal UI with floating action controls
 
 
-
 ---
 
+## Limitations
+
+-This application uses a single shared Google Sheet as its data store.
+
+-User authentication and data isolation are not implemented.
+
+-As a result, the app is intended for single-user usage in its current state.
+
+---
 
 
 ## Tech Stack
