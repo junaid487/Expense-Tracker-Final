@@ -22,11 +22,6 @@ def get_gs_client():
             st.secrets["gcp_service_account"],
             scopes=scopes
         )
-    else:
-        creds = Credentials.from_service_account_file(
-            r"C:\Users\JUNAID\Desktop\expense-tracker-streamlit-2e87e5052fb8.json",
-            scopes=scopes
-        )
 
     return gspread.authorize(creds)
 
