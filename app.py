@@ -111,6 +111,19 @@ def get_excel_bytes(df):
         df.to_excel(writer, index=False, sheet_name="Expenses")
     return buffer.getvalue()
 
+#------------------------------------------------------------------
+def footer():
+    st.markdown("""
+    <br>
+    <p style="text-align:center; color:#555555; font-size:12px;">
+        Built by <span style="font-weight:700; font-size:14px;">Junaid</span>
+    </p>
+
+    <p style="text-align:center; font-size:12px;">
+        <a href="https://github.com/junaid487" target="_blank" style="color:#555555; text-decoration:none;">GitHub  |  </a> 
+        <a href="https://junaid487.github.io/" target="_blank" style="color:#555555; text-decoration:none;">Portfolio  |  </a>
+        <a href="https://www.linkedin.com/in/junaid-alam-81aba93a8/" target="_blank" style="color:#555555; text-decoration:none;">LinkedIn</a>
+    </p>    """, unsafe_allow_html=True)
 
 # =================== FLOATING ACTION BUTTON(FAB) ===================
 
@@ -332,6 +345,8 @@ if df.empty:
     fig_dummy_area = area(dummy_dates, dummy_amounts, 'Date', "Line Chart (Demo)", )
     fig_dummy_area.update_layout(title="Line Chart (Demo)")
     st.plotly_chart(fig_dummy_area, width='stretch')
+    st.markdown("---")
+    footer()
     st.stop()
 
 
@@ -637,4 +652,6 @@ with st.expander("Date Overview"):
             st.markdown('Top Dates by Amount (Table)')
             st.dataframe(display_formatting(date_table))
 
+st.markdown("---")
 
+footer()
