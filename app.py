@@ -415,14 +415,14 @@ with st.expander("🔍 Filters/Search/Export", expanded=False):
 st.markdown('---')
 
 # ---------- APPLY PRESET ----------
-today = pd.Timestamp.today().date()
 today = max_date
+today1 = pd.Timestamp.today().date()
 
 if preset != "None":
 
     if preset == "Last 7 Days":
-        start_date = max(today - pd.Timedelta(days=6), min_date)
-        end_date = today
+        start_date = max(today1 - pd.Timedelta(days=6), min_date)
+        end_date = today1
 
     elif preset == "This Month":
         start_date = max(
