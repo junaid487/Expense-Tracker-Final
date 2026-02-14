@@ -1,6 +1,8 @@
 # Expense Tracker | Streamlit App
 
-A personal expense tracking web application built with Streamlit, pandas, and Plotly, featuring persistent storage using Google Sheets as a lightweight backend. 
+A personal expense tracking web application built with **Streamlit**, **pandas**, and **Plotly**, featuring persistent storage using **Google Sheets** as a lightweight backend.
+
+
 
 This project focuses on clean data handling, UI responsiveness, and practical engineering tradeoffs.
 

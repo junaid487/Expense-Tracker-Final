@@ -416,28 +416,41 @@ st.markdown('---')
 
 # ---------- APPLY PRESET ----------
 today = pd.Timestamp.today().date()
+today = max_date
 
 if preset != "None":
 
     if preset == "Last 7 Days":
-        start_date = max((pd.Timestamp.today() - pd.Timedelta(days=6)).date(), min_date)
-        end_date = min(today, max_date)
+        start_date = max(today - pd.Timedelta(days=6), min_date)
+        end_date = today
 
     elif preset == "This Month":
-        start_date = max(pd.Timestamp.today().replace(day=1).date(), min_date)
-        end_date = min(today, max_date)
+        start_date = max(
+            today.replace(day=1),
+            min_date
+        )
+        end_date = today
 
     elif preset == "Last Month":
-        start_date = max((pd.Timestamp.today().replace(day=1) - pd.Timedelta(days=1)).replace(day=1).date(), min_date)
-        end_date = min((pd.Timestamp.today().replace(day=1) - pd.Timedelta(days=1)).date(), max_date)
+        last_month_end = today.replace(day=1) - pd.Timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        start_date = max(last_month_start, min_date)
+        end_date = min(last_month_end, max_date)
 
     elif preset == "This Year":
-        start_date = max(pd.Timestamp.today().replace(month=1, day=1).date(), min_date)
-        end_date = min(today, max_date)
+        start_date = max(
+            today.replace(month=1, day=1),
+            min_date
+        )
+        end_date = today
 
     elif preset == "Last Year":
-        start_date = max(pd.Timestamp.today().replace(year=today.year - 1, month=1, day=1).date(), min_date)
-        end_date = min(pd.Timestamp.today().replace(year=today.year - 1, month=12, day=31).date(), max_date)
+        last_year_start = today.replace(year=today.year - 1, month=1, day=1)
+        last_year_end = today.replace(year=today.year - 1, month=12, day=31)
+
+        start_date = max(last_year_start, min_date)
+        end_date = min(last_year_end, max_date)
 
 
 #------------------------filtered-df--------------------------
