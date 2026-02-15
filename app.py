@@ -20,17 +20,11 @@ SHEET_NAME = "Sheet1"
 @st.cache_resource
 def get_gs_client():
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-
-    creds = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=scopes
-    )
-
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scopes)
     return gspread.authorize(creds)
 
 #------------------------------------
-
-@st.cache_data(ttl=30)  # seconds
+@st.cache_data(ttl=30)
 def load_expenses_from_sheet():
     client = get_gs_client()
     sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
@@ -41,20 +35,14 @@ def load_expenses_from_sheet():
 
     return pd.DataFrame(records)
 
-
+#-----------------------------------------
 def write_expenses_to_sheet(df):
     client = get_gs_client()
     sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
 
-    clean_df = (
-        df.replace([np.inf, -np.inf], "")
-          .fillna("")
-    )
-
+    clean_df = (df.replace([np.inf, -np.inf], "").fillna(""))
     sheet.clear()
     sheet.update([clean_df.columns.values.tolist()] + clean_df.astype(str).values.tolist())
-
-
 
 #------------------------------------------------------
 
@@ -169,7 +157,7 @@ with fab_container:
     st.button(main_button_label, on_click=toggle_fab_menu, type= "primary")
     st.markdown('</div>', unsafe_allow_html=True)
 
-fab_container.float("bottom: 20px; right: 20px; width: 170px; z-index: 1000;")
+fab_container.float("bottom: 30px; right: 30px; width: 170px; z-index: 1000;")
 
 # ----------------- ADD EXPENSE DIALOG -----------------
 if st.session_state.open_add_flag:
@@ -515,8 +503,6 @@ with excel_placeholder:
         width= "stretch"
     )
 
-
-
 #---------------Highest/Total etc---------
 df_total = filtered_df['Amount'].sum() if not filtered_df.empty else 0
 df_max = filtered_df['Amount'].max() if not filtered_df.empty else 0
@@ -528,26 +514,52 @@ col1, _, col2, _, col3 = st.columns([2, 0.35, 2, 0.35 ,2])
 
 st.markdown("""<style>
 .card {transition: transform .2s ease;}
-.card:hover {filter: brightness(1.25) saturate(1.2);}
+.card:hover {filter: brightness(1.25) saturate(1.2); }
 </style>""", unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    .shimmer-card {
+        position: relative; overflow: hidden; border-radius: 15px; 
+        background: transparent; border: 3px solid #225566; 
+        text-align: center; height: 100px; color: grey;
+        box-shadow: inset 0 0 6px rgba(56, 189, 248, 0.4);
+    }
+    .shimmer-card:hover {
+        box-shadow: inset 0 0 15px rgba(56, 189, 248, 1); background: rgba(0,0,0,0.2); color: white;
+            } 
+    .shimmer-card::after {
+        content: ""; position: absolute; top: 0; left: -150%; 
+        width: 100%; height: 100%; transform: skewX(-30deg);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0s;
+    }
+    .shimmer-card:hover::after {
+        left: 150%; 
+        transition: 1s;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 col1.markdown(f"""
-    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #333333, #046276); color: white; text-align: center; height: 100px;">
-    <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">💰 TOTAL SPENT</p>
-    <h1 style="margin: 0; font-size: 26px;">₹{df_total}</h1>
-</div>
+    <div class="shimmer-card">
+        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">TOTAL SPENT</p>
+        <h1 style="margin: 0; font-size: 26px;">
+            ₹{df_total}
+        </h1>
+    </div>
 """, unsafe_allow_html=True)
 
 col2.markdown(f"""
-    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #046276, #333333, #63c3a488); color: white; text-align: center; height: 100px;">
-        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">📈 HIGHEST EXPENSE</p>
+    <div class= "shimmer-card">
+        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">HIGHEST EXPENSE</p>
         <h1 style="margin: 0; font-size: 26px;">₹{df_max} {df_max_name}</h1>
     </div>
 """, unsafe_allow_html=True)
 
 col3.markdown(f"""
-    <div class= "card" style="padding: 10px; border-radius: 15px; background: linear-gradient(45deg, #63c3a488, #333333, #046276); color: white; text-align: center; height: 100px;">
-        <p style="margin-bottom: 3px; font-size: 18px; font-weight: bold;">🔢 TOTAL TRANSACTIONS</p>
+    <div class= "shimmer-card">
+        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">TOTAL TRANSACTIONS</p>
         <h1 style="margin: 0; font-size: 26px;">{df_len}</h1>
     </div>
 """, unsafe_allow_html=True)
