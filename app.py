@@ -288,31 +288,101 @@ if st.session_state.show_clear_popup:
 #--------------------EMPTY PAGE----------------------
 st.markdown("""
 <style>
-.empty-card { padding: 80px; border-radius: 25px; background: linear-gradient(45deg, #223645, #000000, #046276);
-    text-align: center; color: lightyellow; margin-top: 40px; box-shadow: 0 0 10px rgba(255,255,255,0.35);}
-.empty-title { font-size: 50px; margin-bottom: 20px; font-weight: bold; }
-.empty-desc { font-size: 25px; opacity: 0.85; margin-bottom: 25px; }
-.empty-bullets { font-size: 20px; text-align: left; margin: 0 auto; max-width: 350px; opacity: 0.9; }
-.empty-card:hover { filter: brightness(1.15) saturate(1.2); box-shadow: 0 0 15px rgba(0,128,128,0.25); }
+.bloom-card {
+    position: relative;
+    overflow: hidden;
+    padding: 72px 64px;
+    border-radius: 32px;
+
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(59,130,246,0.45);
+    color: #e5e7eb;
+    text-align: center;
+    margin-top: 50px;
+
+    box-shadow:
+        0 30px 60px -15px rgba(0,0,0,0.7),
+        inset 0 0 50px rgba(59,130,246,0.18);
+}
+
+.shimmer {
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.08),
+        transparent
+    );
+    transform: skewX(-20deg);
+}
+
+.bloom-card:hover .shimmer {
+    left: 150%;
+    transition: left 0.9s ease-in-out;
+}
+
+.empty-title {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 18px;
+}
+
+.empty-desc {
+    font-size: 22px;
+    opacity: 0.85;
+    margin-bottom: 34px;
+}
+
+.empty-bullets {
+    max-width: 460px;
+    margin: 0 auto;
+    text-align: left;
+    font-size: 18px;
+    line-height: 1.7;
+    opacity: 0.9;
+}
+
+.empty-bullets li {
+    margin-bottom: 10px;
+}
+
+.empty-cta {
+    margin-top: 34px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #7dd3fc;
+    letter-spacing: 0.3px;
+}
 </style>
 """, unsafe_allow_html=True)
 
+
 if df.empty:
     st.markdown("""
-    <div class="empty-card">
-        <div class="empty-title">📊 WELCOME TO EXPENSE TRACKER</div>
-        <div class="empty-desc">Start tracking your spendings.</div>
-        <ul class="empty-bullets">
-            <li>Add/Delete expenses using the Add button below</li>
-            <li>View category and date summaries</li>
-            <li>View and Interact with Line, Pie, and Bar Charts</li>
-        </ul>
-        <br>
-        <div style="opacity:0.85;margin-top:15px;font-size:18px;color:yellow;">
-            BEGIN BY ADDING YOUR FIRST EXPENSE USING THE "ACTIONS" BUTTON AT BOTTOM-RIGHT
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="bloom-card">
+<div class="shimmer"></div>
+
+<div class="empty-title">📊 Expense Tracker</div>
+<div class="empty-desc">Start tracking your spendings</div>
+
+<ul class="empty-bullets">
+    <li>Add, delete, and manage expenses instantly</li>
+    <li>Analyze spending by category and date</li>
+    <li>Export filtered data to CSV or Excel</li>
+</ul>
+
+<div class="empty-cta">
+    Start by clicking <b>“Actions”</b> in the bottom-right
+</div>
+</div>
+""", unsafe_allow_html=True)
+
     st.markdown("")
     st.markdown("")
     st.markdown("---")
@@ -350,7 +420,7 @@ st.markdown("""
 <div class="main-title">EXPENSE TRACKER</div>
 """, unsafe_allow_html=True)
 
-st.markdown('---')
+st.markdown('\n')
 
 start_date = None
 end_date = None
@@ -415,7 +485,7 @@ with st.expander("🔍 Filters/Search/Export", expanded=False):
         st.markdown("<br>", unsafe_allow_html=True)
         excel_placeholder = excel_col.empty()
 
-st.markdown('---')
+st.markdown('\n')
 
 # ---------- APPLY PRESET ----------
 today = max_date
