@@ -55,15 +55,26 @@ df_filter = df.copy()
 df_filter["date_dt"] = pd.to_datetime(df_filter["Date"], format="%d-%m-%Y", errors="coerce")
 
 #--------------Helper Functions------------
+#THEME STATE
+if "theme_name" not in st.session_state:
+    st.session_state.theme_name = "teal"
+
+def get_theme():
+    if st.session_state.theme_name == "teal":
+        return px.colors.sequential.Teal_r
+    else:
+        return px.colors.qualitative.Set2
+
+
 # bar chart
 def bar(df,a,_title):
-    fig = px.bar(df, x= a, y= 'Amount', title= _title, text= 'Amount', color= a, color_discrete_sequence=px.colors.sequential.Teal_r)    #qualitative.Set2
+    fig = px.bar(df, x= a, y= 'Amount', title= _title, text= 'Amount', color= a, color_discrete_sequence= get_theme())    #px.colors.qualitative.Set2 or px.colors.sequential.Teal_r
     fig.update_traces(width=0.6)
     return fig
 
 # Pie chart
 def pie(df,name,_title):
-    fig = px.pie(df, names=name, values='Amount', title= _title, hole=0.4, color_discrete_sequence= px.colors.sequential.Teal_r)
+    fig = px.pie(df, names=name, values='Amount', title= _title, hole=0.4, color_discrete_sequence= get_theme())
     return fig
 
 #Area chart
@@ -706,10 +717,21 @@ with st.expander("Date Overview"):
             st.markdown('Top Dates by Amount (Table)')
             st.dataframe(display_formatting(date_table))
 
+if "theme" not in st.session_state:
+    st.session_state.theme = px.colors.sequential.Teal_r
+else:
+    st.session_state.theme = px.colors.qualitative.Set2
+
+_, col_theme, _ = st.columns([5,5,5])
+if col_theme.button("Switch Theme", width= 'stretch'):
+    st.session_state.theme_name = ("theme2" if st.session_state.theme_name == "teal" else "teal")
+    st.rerun()
+
 st.markdown("---")
 
+
 # _, col_help, _, = st.columns([5,5,5])
-# col_help.button("How to use", use_container_width=True)
+# col_help.button("How to use", width= 'stretch')
 
 
 footer()
