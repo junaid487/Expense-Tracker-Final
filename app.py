@@ -294,15 +294,15 @@ st.markdown("""
     padding: 72px 64px;
     border-radius: 32px;
 
-    background: rgba(255,255,255,0.04);
+    background: var(--secondary-background-color);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(59,130,246,0.45);
-    color: #e5e7eb;
+    color: var(--text-color) !important;
     text-align: center;
+    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
     margin-top: 50px;
 
     box-shadow:
-        0 30px 60px -15px rgba(0,0,0,0.7),
         inset 0 0 50px rgba(59,130,246,0.18);
 }
 
@@ -327,6 +327,7 @@ st.markdown("""
 }
 
 .empty-title {
+    color: var(--text-color) !important;
     font-size: 48px;
     font-weight: 800;
     letter-spacing: -0.5px;
@@ -368,7 +369,7 @@ if df.empty:
 <div class="bloom-card">
 <div class="shimmer"></div>
 
-<div class="empty-title">📊 Expense Tracker</div>
+<div class="empty-title" style="color: var(--text-color);">📊 Expense Tracker</div>
 <div class="empty-desc">Start tracking your spendings</div>
 
 <ul class="empty-bullets">
@@ -413,11 +414,11 @@ if df.empty:
 #------------Page Title----------------
 st.markdown("""
 <style>
-.main-title { font-size: 4em; font-weight: 900; color: transparent; letter-spacing: 3px; 
+.main-title { font-size: 4em; font-weight: 900; color: transparent; letter-spacing: 3px; -webkit-text-stroke: 1px black;
     text-shadow: 2px 2px 4px rgba(255,255,255,0.4); padding-bottom: 10px; margin-bottom: 0px; 
-    background: linear-gradient(45deg, #eeeeee, #63c3a4, #eeeeee, #eeeeee, #eeeeee); background-clip: text; }
+    background: linear-gradient(45deg, #eeeeee, #63c3a4, #eeeeee, #63c3a4, #eeeeee); background-clip: text; }
 </style>
-<div class="main-title">EXPENSE TRACKER</div>
+<div class="main-title" style="-webkit-text-stroke: 3px">EXPENSE TRACKER</div>
 """, unsafe_allow_html=True)
 
 st.markdown('\n')
@@ -587,53 +588,29 @@ st.markdown("""<style>
 .card:hover {filter: brightness(1.25) saturate(1.2); }
 </style>""", unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-    .shimmer-card {
-        position: relative; overflow: hidden; border-radius: 15px; 
-        background: transparent; border: 3px solid #225566; 
-        text-align: center; height: 100px; color: grey;
-        box-shadow: inset 0 0 6px rgba(56, 189, 248, 0.4);
-    }
-    .shimmer-card:hover {
-        box-shadow: inset 0 0 15px rgba(56, 189, 248, 1); background: rgba(0,0,0,0.2); color: white;
-            } 
-    .shimmer-card::after {
-        content: ""; position: absolute; top: 0; left: -150%; 
-        width: 100%; height: 100%; transform: skewX(-30deg);
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: 0s;
-    }
-    .shimmer-card:hover::after {
-        left: 150%; 
-        transition: 1s;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 col1.markdown(f"""
-    <div class="shimmer-card">
-        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">TOTAL SPENT</p>
-        <h1 style="margin: 0; font-size: 26px;">
-            ₹{df_total}
-        </h1>
-    </div>
+<div class="bloom-card" style="padding: 1px 1px; margin-top: 0px; max-height: 80px; min-height: 80px; border-radius: 10px;">
+    <div class="shimmer"></div>
+    <div class="empty-cta" style="font-size: 14px; margin-top: 17px;">TOTAL SPENT</div>
+    <div class="empty-cta" style="font-size: 18px; margin-top: 0px; margin-bottom: 0px;">₹{df_total}</div>
+</div>
 """, unsafe_allow_html=True)
 
 col2.markdown(f"""
-    <div class= "shimmer-card">
-        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">HIGHEST EXPENSE</p>
-        <h1 style="margin: 0; font-size: 26px;">₹{df_max} {df_max_name}</h1>
-    </div>
+<div class="bloom-card" style="padding: 1px 1px;margin-top: 0px; max-height: 80px; min-height: 80px; border-radius: 10px;">
+    <div class="shimmer"></div>
+    <div class="empty-cta" style="font-size: 14px; margin-top: 17px;">HIGHEST EXPENSE</div>
+    <div class="empty-cta" style="font-size: 18px; margin-top: 0px; margin-bottom: 0px;">₹{df_max}{df_max_name}</div>
+</div>
 """, unsafe_allow_html=True)
 
 col3.markdown(f"""
-    <div class= "shimmer-card">
-        <p style="margin-bottom: 3px; margin-top: 10px; font-size: 14px; font-weight: bold;">TOTAL TRANSACTIONS</p>
-        <h1 style="margin: 0; font-size: 26px;">{df_len}</h1>
-    </div>
+<div class="bloom-card" style="padding: 1px 1px; margin-top: 0px; max-height: 80px; min-height: 80px; border-radius: 10px;">
+    <div class="shimmer"></div>
+    <div class="empty-cta" style="font-size: 14px; margin-top: 17px;">TOTAL TRANSACTIONS</div>
+    <div class="empty-cta" style="font-size: 18px; margin-top: 0px; margin-bottom: 0px;">{df_len}</div>
+</div>
 """, unsafe_allow_html=True)
-
 st.markdown('---')
 
 #---------------MAin Table----------
