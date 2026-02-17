@@ -157,7 +157,7 @@ with fab_container:
     st.button(main_button_label, on_click=toggle_fab_menu, type= "primary")
     st.markdown('</div>', unsafe_allow_html=True)
 
-fab_container.float("bottom: 30px; right: 30px; width: 170px; z-index: 1000;")
+fab_container.float("bottom: 15px; left: 25px; width: 170px; z-index: 1000;")
 
 # ----------------- ADD EXPENSE DIALOG -----------------
 if st.session_state.open_add_flag:
@@ -583,11 +583,6 @@ df_len = len(filtered_df)
 
 col1, _, col2, _, col3 = st.columns([2, 0.35, 2, 0.35 ,2])
 
-st.markdown("""<style>
-.card {transition: transform .2s ease;}
-.card:hover {filter: brightness(1.25) saturate(1.2); }
-</style>""", unsafe_allow_html=True)
-
 col1.markdown(f"""
 <div class="bloom-card" style="padding: 1px 1px; margin-top: 0px; max-height: 80px; min-height: 80px; border-radius: 10px;">
     <div class="shimmer"></div>
@@ -712,5 +707,9 @@ with st.expander("Date Overview"):
             st.dataframe(display_formatting(date_table))
 
 st.markdown("---")
+
+# _, col_help, _, = st.columns([5,5,5])
+# col_help.button("How to use", use_container_width=True)
+
 
 footer()
