@@ -22,18 +22,18 @@ This project focuses on clean data handling, UI responsiveness, and practical en
 * Frontend/Framework: Streamlit
 * Data Handling: pandas, NumPy
 * Visualization: Plotly
-* Persistence Layer: Google Sheets API (via st-gsheets-connection)
+* Persistence Layer: Google Sheets API
 * Auth: Google Service Account (OAuth2)
 * Deployment: Streamlit Cloud
 
 ## Architecture and Decisions
 
 ### Why Google Sheets as a Backend?
-This project intentionally uses Google Sheets as a persistence layer instead of a traditional SQL database.
+This project uses Google Sheets as a persistence layer instead of a traditional SQL database.
 
 * Advantages: Completely free and serverless.
 * Security: Access is restricted via a Google Service Account. Only the app (authenticated via a private key) can read or write data.
-* Tradeoffs: Designed for single-user scenarios. Not intended for high-traffic production environments due to API rate limits.
+* Tradeoffs: Designed for single-user scenarios. **Not** intended for high-traffic production environments due to API rate limits.
 
 ### Design Philosophy
 * Clarity over Premature Optimization: Prioritized a clean user experience and robust error handling.
@@ -76,11 +76,11 @@ client_x509_cert_url = "your-cert-url"<br>
 
 ## Limitations
 
-* This application uses a single shared Google Sheet as its data store.
+* This application uses a single shared Google Sheet as its dataBase.
 
 * User authentication and data isolation are not implemented.
 
-* As a result, the app is intended for single-user usage or demo purposes only.
+* As a result, the app is intended for single-user usage only.
 
 ---
-Built with Python by Junaid Alam.
+Built with Python by **Junaid Alam**.
