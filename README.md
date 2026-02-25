@@ -6,6 +6,10 @@ A personal expense tracking web application built with **Streamlit**, **pandas**
 
 This project focuses on clean data handling, UI responsiveness, and practical engineering tradeoffs.
 
+## Expense Tracker Demo
+
+![Expense Tracker Demo](expense%20tracker.gif)
+
 ## Live Demo
 [Check out the App](https://junaidexp.streamlit.app/)
 
