@@ -4,5 +4,5 @@ numpy
 plotly
 openpyxl
 streamlit-float
-gspread
-google-auth
+mysql-connector-python
+python-dotenv
