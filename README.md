@@ -4,6 +4,10 @@ A full-stack expense tracking web application built with **Streamlit**, **Pandas
 
 This project focuses on modular architecture, clean data handling, and interactive visualizations.
 
+## Expense Tracker Demo
+
+![Expense Tracker Demo](expense%20tracker.gif)
+
 ## Live Demo
 [Check out the App](https://junaidexp.streamlit.app/)
 
