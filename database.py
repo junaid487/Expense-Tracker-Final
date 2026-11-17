@@ -43,7 +43,7 @@ def fetch_all_expenses():
         df["Date"] = df["date"].apply(lambda x: x.strftime("%d-%b-%Y") if x else "")
         df["Time"] = df["time"].apply(lambda x: str(x).split()[-1][:5] if x else "")
         # Here time is a Timedelta object like Timedelta('0 days 14:56:00').
-        # We only want "14:56".
+        # i only need "14:56".
 
         df = df.rename(columns={
             "name": "Name",

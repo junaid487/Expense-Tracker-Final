@@ -14,7 +14,6 @@ This project focuses on modular architecture, clean data handling, and interacti
 > Note:
 > This demo uses a shared public database without authentication.
 > Any data added, edited, or deleted is visible to all users.
-> To Do: add authentication.
 
 ## Features
 - **Full CRUD**: Add, delete, and clear expenses with instant database synchronization.
@@ -84,13 +83,6 @@ DB_NAME=expense_tracker
 ```bash
 streamlit run app.py
 ```
-
----
-
-## Design Philosophy
-- **Separation of Concerns**: Decoupled the database logic from the UI layer.
-- **User-Centric Design**: Focused on a premium feel with glassmorphism and smooth animations.
-- **Data Integrity**: Used proper SQL types and Pandas for robust data validation.
 
 ---
 Built by **Junaid Alam**.
